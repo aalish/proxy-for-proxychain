@@ -1,0 +1,67 @@
+#!/bin/python
+
+#setting up variables as global
+lines_data=[]
+index = 0
+flag = 0
+#this is main function
+def main():
+    path="/etc/proxychains.conf"
+    proxy_path="proxies.txt"
+    read_line(path)
+    get_line_for_proxy(path)
+    copy_from_poxy(proxy_path=proxy_path, proxychains_config_path=path)
+
+#This get line for proxy at which a list a proxy is to be added.
+def get_line_for_proxy(path):
+    global index
+    global flag
+    file = open(path, "r")
+
+    for line in file:
+      index = index + 1
+      #if the line is found break the execution and set the flag.
+      if "[ProxyList]" in line:
+        flag = 1
+        break
+
+    if flag == 1:
+      print("Sucess at "+ str(index))
+
+    else:
+    #Not found
+      print("Something went wrong. Can't find proxy list place in config file.")
+      exit()
+
+    file.close()
+
+#Writing proxies from the txt file.
+def copy_from_poxy(proxy_path, proxychains_config_path):
+    global index
+    global lines_data
+    file2 = open(proxy_path,"r")
+    #reading proxies list
+    proxies_line = file2.readlines()
+    for line in proxies_line:
+      index = index + 1
+      lines_data[index]= line
+    file2.close()
+    #slicing the variable as only new proxy is to be written.
+    lines_data = lines_data[:index+1]
+
+    file = open(proxychains_config_path,"w")
+    file.writelines(lines_data)
+    file.close()
+
+def read_line(path):
+    #Reading the whole value in the file
+    global lines_data
+    file = open(path, "r")
+    lines_data=file.readlines()
+    file.close()
+
+if __name__ == '__main__':
+    main()
+
+
+#I KNOW THE CODE IS FUCKED OFF AND CAN BE WELL OBTIMIZED BUT THIS CODE IS WRITTEN FOR ME BY ME.

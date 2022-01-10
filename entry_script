@@ -1,0 +1,5 @@
+#!/bin/bash
+chmod +x get-proxy
+chmod +x add_proxy
+./get-proxy
+sudo ./add_proxy

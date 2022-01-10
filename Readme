@@ -1,0 +1,8 @@
+This script get list of free proxy and ping it for the status
+It adds upto 100 proxy to proxyconfig rule.
+
+Before using this know about procychains and its uses as it integrates with proxychains.
+
+Usage:
+chmod +x entry_script
+sudo ./entry_script

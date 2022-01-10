@@ -1,0 +1,72 @@
+#!/bin/python
+from urllib.request import Request, urlopen
+from bs4 import BeautifulSoup
+from fake_useragent import UserAgent
+import random
+import requests
+ua = UserAgent() # From here we generate a random user agent
+proxies = [] # Will contain proxies [ip, port]
+final = []
+# Main function
+def main():
+  # Retrieve latest proxies
+  proxies_req = Request('https://www.sslproxies.org/')
+  proxies_req.add_header('User-Agent', ua.random)
+  proxies_doc = urlopen(proxies_req).read().decode('utf8')
+
+  soup = BeautifulSoup(proxies_doc, 'html.parser')
+  proxies_table = soup.find("table", attrs={"class":"table table-striped table-bordered"})
+  table_data = proxies_table.tbody.find_all("tr")
+
+  # Save proxies in the array
+  for row in proxies_table.tbody.find_all('tr'):
+    proxies.append({
+      'ip':   row.find_all('td')[0].string,
+      'port': row.find_all('td')[1].string
+    })
+
+
+  # Choose a random proxy
+  proxy_index = random_proxy()
+  total = 0
+  for proxy_index in range(1,len(proxies)):
+      if check_connectivity(proxies[proxy_index]):
+          total = total+1
+          if total == 100:
+              break
+  write_file(data=final)
+def check_connectivity(proxy):
+  # try:
+    global final
+    url = "http://"+proxy['ip'] + ':' + proxy['port']
+    print(url)
+    try:
+        req = requests.get("http://icanhazip.com", proxies={'http': url}, timeout=5)
+        if req.status_code == 200:
+            final.append("http    "+str(proxy['ip'])+"   "+str(proxy['port'])+ "\n")
+            print(final)
+            return(True)
+        else:
+           return(False)
+    except Exception as e: # If error, delete this proxy and find another one
+  #     # del proxies[proxy_index]
+  #     # print('Proxy ' + proxy['ip'] + ':' + proxy['port'] + ' deleted.')
+  #     # proxy_index = random_proxy()
+  #     # proxy = proxies[proxy_index]
+        print(e)
+
+
+def write_file(data):
+  proxy_path = "proxies.txt"
+  proxy_file = open(proxy_path, "w")
+  proxy_file.writelines(data)
+  proxy_file.write("\n")
+  proxy_file.close()
+
+# Retrieve a random index proxy (we need the index to delete it if not working)
+def random_proxy():
+
+  return random.randint(0, len(proxies) - 1)
+
+if __name__ == '__main__':
+  main()
